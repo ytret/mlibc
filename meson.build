@@ -48,31 +48,6 @@ if not headers_only
 	add_project_arguments('-std=c++17', language: 'cpp')
 	add_project_arguments('-fno-rtti', '-fno-exceptions', language: 'cpp')
 	add_project_link_arguments('-nostdlib', language: ['c', 'cpp'])
-
-	if c_compiler.get_id() == 'gcc'
-		gccdir = run_command('/bin/sh', '-c',
-			' '.join(c_compiler.cmd_array())
-					+ ' -print-search-dirs | sed -n -e "s/install: \(.*\)/\\1/p"',
-			env: ['LANG=C'],
-			check: true).stdout().strip()
-
-		rtdl_include_dirs += include_directories(gccdir / 'include')
-		libc_include_dirs += include_directories(gccdir / 'include')
-		# Ubuntu seems to patch out include-fixed/ (the files are in include/ instead).
-		if fs.exists(gccdir / 'include-fixed')
-			rtdl_include_dirs += include_directories(gccdir / 'include-fixed')
-			libc_include_dirs += include_directories(gccdir / 'include-fixed')
-		endif
-	elif c_compiler.get_id() == 'clang'
-		clangdir = run_command('/bin/sh', '-c',
-			' '.join(c_compiler.cmd_array())
-					+ ' -print-search-dirs | sed -ne "s/libraries: =\(.*\):.*/\\1/p"',
-			env: ['LANG=C'],
-			check: true).stdout().strip()
-
-		rtdl_include_dirs += include_directories(clangdir / 'include')
-		libc_include_dirs += include_directories(clangdir / 'include')
-	endif
 endif
 
 internal_conf.set_quoted('MLIBC_SYSTEM_NAME', host_machine.system())
@@ -223,6 +198,33 @@ rtdl_sources += [
 
 if not static
 	rtdl_sources += 'options/rtdl' / host_machine.cpu_family() / 'entry.S'
+endif
+
+if not headers_only
+	if c_compiler.get_id() == 'gcc'
+		gccdir = run_command('/bin/sh', '-c',
+			' '.join(c_compiler.cmd_array())
+					+ ' -print-search-dirs | sed -n -e "s/install: \(.*\)/\\1/p"',
+			env: ['LANG=C'],
+			check: true).stdout().strip()
+
+		rtdl_include_dirs += include_directories(gccdir / 'include')
+		libc_include_dirs += include_directories(gccdir / 'include')
+		# Ubuntu seems to patch out include-fixed/ (the files are in include/ instead).
+		if fs.exists(gccdir / 'include-fixed')
+			rtdl_include_dirs += include_directories(gccdir / 'include-fixed')
+			libc_include_dirs += include_directories(gccdir / 'include-fixed')
+		endif
+	elif c_compiler.get_id() == 'clang'
+		clangdir = run_command('/bin/sh', '-c',
+			' '.join(c_compiler.cmd_array())
+					+ ' -print-search-dirs | sed -ne "s/libraries: =\(.*\):.*/\\1/p"',
+			env: ['LANG=C'],
+			check: true).stdout().strip()
+
+		rtdl_include_dirs += include_directories(clangdir / 'include')
+		libc_include_dirs += include_directories(clangdir / 'include')
+	endif
 endif
 
 subdir('options/elf')
