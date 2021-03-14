@@ -279,7 +279,14 @@ struct __abi_tls_entry {
 	uint64_t offset;
 };
 
-// static_assert(sizeof(__abi_tls_entry) == 16, "Bad __abi_tls_entry size");
+#if defined(__i386__)
+// FIXME?
+static_assert(sizeof(__abi_tls_entry) == 12, "Bad __abi_tls_entry size");
+#elif defined(__x86_64__) || defined(__aarch64__)
+static_assert(sizeof(__abi_tls_entry) == 16, "Bad __abi_tls_entry size");
+#else
+#error
+#endif
 
 const char *lastError;
 
