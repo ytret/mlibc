@@ -56,10 +56,9 @@ typedef __INT64_TYPE__ __mlibc_int64;
 
 #if defined (__i386__)
 
-typedef __mlibc_int8 __mlibc_int_fast8;
-#define __MLIBC_INT_FAST8_C(x) __MLIBC_INT8_C(x)
-#define __MLIBC_INT_FAST8_MAX __MLIBC_INT8_MAX
-#define __MLIBC_INT_FAST8_MIN __MLIBC_INT8_MIN
+typedef __INT_FAST8_TYPE__ __mlibc_int_fast8;
+#define __MLIBC_INT_FAST8_MAX __INT_FAST8_MAX__
+#define __MLIBC_INT_FAST8_MIN __INT_FAST8_MIN__
 
 typedef __mlibc_int32 __mlibc_int_fast16;
 #define __MLIBC_INT_FAST16_C(x) __MLIBC_INT32_C(x)
@@ -128,10 +127,9 @@ typedef __mlibc_int64 __mlibc_int_fast64;
 
 #if defined (__i386__)
 
-typedef __mlibc_uint8 __mlibc_uint_fast8;
-#define __MLIBC_UINT_FAST8_C(x) __MLIBC_UINT8_C(x)
-#define __MLIBC_UINT_FAST8_MAX __MLIBC_UINT8_MAX
-#define __MLIBC_UINT_FAST8_MIN __MLIBC_UINT8_MIN
+typedef __UINT_FAST8_TYPE__ __mlibc_uint_fast8;
+#define __MLIBC_UINT_FAST8_MAX __UINT_FAST8_MAX__
+#define __MLIBC_UINT_FAST8_MIN __UINT_FAST8_MIN__
 
 typedef __mlibc_uint32 __mlibc_uint_fast16;
 #define __MLIBC_UINT_FAST16_C(x) __MLIBC_UINT32_C(x)
@@ -255,15 +253,15 @@ __MLIBC_CHECK_TYPE(__mlibc_uint64, __UINT_LEAST64_TYPE__);
 // Fast-width.
 // Unfortunately, GCC and Clang disagree about fast types.
 #ifndef __clang__
-	// __MLIBC_CHECK_TYPE(__mlibc_int_fast8,  __INT_FAST8_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_int_fast16, __INT_FAST16_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_int_fast32, __INT_FAST32_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_int_fast64, __INT_FAST64_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_int_fast8,  __INT_FAST8_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_int_fast16, __INT_FAST16_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_int_fast32, __INT_FAST32_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_int_fast64, __INT_FAST64_TYPE__);
 
-	// __MLIBC_CHECK_TYPE(__mlibc_uint_fast8,  __UINT_FAST8_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_uint_fast16, __UINT_FAST16_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_uint_fast32, __UINT_FAST32_TYPE__);
-	// __MLIBC_CHECK_TYPE(__mlibc_uint_fast64, __UINT_FAST64_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_uint_fast8,  __UINT_FAST8_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_uint_fast16, __UINT_FAST16_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_uint_fast32, __UINT_FAST32_TYPE__);
+       __MLIBC_CHECK_TYPE(__mlibc_uint_fast64, __UINT_FAST64_TYPE__);
 #endif
 
 #endif // _MLIBC_INTERNAL_TYPES_H
