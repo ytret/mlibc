@@ -16,6 +16,14 @@
 #define ULONG_MAX (LONG_MAX * 2UL + 1UL)
 #endif
 
+#ifndef LONG_LONG_MAX
+#define LONG_LONG_MAX __LONG_LONG_MAX__
+#endif
+
+#ifndef LONG_LONG_MIN
+#define LONG_LONG_MIN (-LONG_LONG_MAX - 1LL)
+#endif
+
 #ifndef INT_MAX
 #define INT_MAX __INT_MAX__
 #endif
