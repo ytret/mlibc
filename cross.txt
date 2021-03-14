@@ -1,0 +1,11 @@
+[host_machine]
+system = 'myos'
+cpu_family = 'x86'
+cpu = 'i386'
+endian = 'little'
+
+[binaries]
+c = 'i686-elf-gcc'
+cpp = 'i686-elf-g++'
+ar = 'i686-elf-ar'
+strip = 'i686-elf-strip'

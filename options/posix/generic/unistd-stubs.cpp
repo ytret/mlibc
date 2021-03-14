@@ -12,6 +12,8 @@
 #include <mlibc/debug.hpp>
 #include <mlibc/posix-sysdeps.hpp>
 
+#define NAME_MAX 255
+
 unsigned int alarm(unsigned int seconds) {
 	__ensure(!"Not implemented");
 	__builtin_unreachable();

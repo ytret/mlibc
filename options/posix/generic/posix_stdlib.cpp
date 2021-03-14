@@ -16,6 +16,8 @@
 #include <mlibc/debug.hpp>
 #include <mlibc/posix-sysdeps.hpp>
 
+#define PATH_MAX 4096
+
 namespace {
 	constexpr bool debugPathResolution = false;
 }

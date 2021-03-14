@@ -60,7 +60,7 @@ void closeOrDie(int fd) {
 namespace {
 	Tcb *getCurrentTcb() {
 		uintptr_t ptr;
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__i386__)
 		asm volatile ("mov %%fs:0, %0" : "=r"(ptr));
 #elif defined(__aarch64__)
 		asm volatile ("mrs %0, tpidr_el0" : "=r"(ptr));

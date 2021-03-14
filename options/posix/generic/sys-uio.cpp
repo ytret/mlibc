@@ -11,6 +11,8 @@
 #include <mlibc/debug.hpp>
 #include <bits/ensure.h>
 
+#define SSIZE_MAX INT_MAX
+
 ssize_t readv(int, const struct iovec *, int) {
 	__ensure(!"Not implemented");
 	__builtin_unreachable();

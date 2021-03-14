@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <pwd.h>
 
+#define PATH_MAX 4096
+
 struct match
 {
 	struct match *next;

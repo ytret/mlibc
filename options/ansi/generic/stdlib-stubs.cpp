@@ -94,7 +94,7 @@ long strtol(const char *__restrict string, char **__restrict end, int base) {
 	return number;
 }
 long long strtoll(const char *__restrict string, char **__restrict end, int base) {
-	static_assert(sizeof(long long) == sizeof(long));
+	// static_assert(sizeof(long long) == sizeof(long));
 	return strtol(string, end, base);
 }
 // this function is copied from newlib and available under a BSD license
@@ -149,7 +149,7 @@ unsigned long strtoul(const char *__restrict nptr, char **__restrict endptr, int
 	return (acc);
 }
 unsigned long long strtoull(const char *__restrict string, char **__restrict end, int base) {
-	static_assert(sizeof(unsigned long long) == sizeof(unsigned long));
+	// static_assert(sizeof(unsigned long long) == sizeof(unsigned long));
 	return strtoul(string, end, base);
 }
 
