@@ -82,7 +82,7 @@ ObjectRepository::ObjectRepository()
 
 SharedObject *ObjectRepository::injectObjectFromDts(frg::string_view name,
 		frg::string<MemoryAllocator> path, uintptr_t base_address,
-		Elf64_Dyn *dynamic, uint64_t rts) {
+		ElfW(Dyn) *dynamic, uint64_t rts) {
 	__ensure(!_nameMap.get(name));
 
 	auto object = frg::construct<SharedObject>(getAllocator(),
@@ -312,7 +312,7 @@ void ObjectRepository::_fetchFromPhdrs(SharedObject *object, void *phdr_pointer,
 	}
 
 	if(dynamic_offset)
-		object->dynamic = (Elf64_Dyn *)(object->baseAddress + *dynamic_offset);
+		object->dynamic = (ElfW(Dyn) *)(object->baseAddress + *dynamic_offset);
 	if(tls_offset)
 		object->tlsImagePtr = (void *)(object->baseAddress + *tls_offset);
 }
@@ -428,7 +428,7 @@ void ObjectRepository::_fetchFromFile(SharedObject *object, int fd) {
 			object->tlsImageSize = phdr->p_filesz;
 			object->tlsImagePtr = (void *)(object->baseAddress + phdr->p_vaddr);
 		}else if(phdr->p_type == PT_DYNAMIC) {
-			object->dynamic = (Elf64_Dyn *)(object->baseAddress + phdr->p_vaddr);
+			object->dynamic = (ElfW(Dyn) *)(object->baseAddress + phdr->p_vaddr);
 		}else if(phdr->p_type == PT_INTERP
 				|| phdr->p_type == PT_PHDR
 				|| phdr->p_type == PT_NOTE
@@ -456,7 +456,7 @@ void ObjectRepository::_parseDynamic(SharedObject *object) {
 	frg::optional<ptrdiff_t> runpath_offset;
 
 	for(size_t i = 0; object->dynamic[i].d_tag != DT_NULL; i++) {
-		Elf64_Dyn *dynamic = &object->dynamic[i];
+		ElfW(Dyn) *dynamic = &object->dynamic[i];
 		switch(dynamic->d_tag) {
 		// handle hash table, symbol table and string table
 		case DT_HASH:
@@ -476,7 +476,7 @@ void ObjectRepository::_parseDynamic(SharedObject *object) {
 			object->symbolTableOffset = dynamic->d_un.d_ptr;
 			break;
 		case DT_SYMENT:
-			__ensure(dynamic->d_un.d_val == sizeof(Elf64_Sym));
+			__ensure(dynamic->d_un.d_val == sizeof(ElfW(Sym)));
 			break;
 		// handle lazy relocation table
 		case DT_PLTGOT:
@@ -565,7 +565,7 @@ void ObjectRepository::_parseDynamic(SharedObject *object) {
 void ObjectRepository::_discoverDependencies(SharedObject *object, uint64_t rts) {
 	// Load required dynamic libraries.
 	for(size_t i = 0; object->dynamic[i].d_tag != DT_NULL; i++) {
-		Elf64_Dyn *dynamic = &object->dynamic[i];
+		auto *dynamic = &object->dynamic[i];
 		if(dynamic->d_tag != DT_NEEDED)
 			continue;
 
@@ -633,7 +633,7 @@ void processCopyRelocations(SharedObject *object) {
 	frg::optional<size_t> rela_length;
 
 	for(size_t i = 0; object->dynamic[i].d_tag != DT_NULL; i++) {
-		Elf64_Dyn *dynamic = &object->dynamic[i];
+		auto *dynamic = &object->dynamic[i];
 
 		switch(dynamic->d_tag) {
 		case DT_RELA:
@@ -1245,7 +1245,7 @@ void Loader::_processStaticRelocations(SharedObject *object) {
 	frg::optional<size_t> rela_length;
 
 	for(size_t i = 0; object->dynamic[i].d_tag != DT_NULL; i++) {
-		Elf64_Dyn *dynamic = &object->dynamic[i];
+		auto *dynamic = &object->dynamic[i];
 
 		switch(dynamic->d_tag) {
 		case DT_RELA:
@@ -1353,4 +1353,3 @@ void Loader::_processLazyRelocations(SharedObject *object) {
 		}
 	}
 }
-

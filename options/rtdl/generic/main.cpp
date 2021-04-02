@@ -18,7 +18,7 @@ static constexpr bool logStartup = false;
 
 #ifndef MLIBC_STATIC_BUILD
 extern HIDDEN void *_GLOBAL_OFFSET_TABLE_[];
-extern HIDDEN Elf64_Dyn _DYNAMIC[];
+extern HIDDEN ElfW(Dyn) _DYNAMIC[];
 #endif
 
 uintptr_t *entryStack;
@@ -141,7 +141,7 @@ extern "C" void *interpreterMain(uintptr_t *entry_stack) {
 	}
 
 // on aarch64 these lines corrupt unrelated GOT entries (entries for ld.so functions)
-#ifdef __x86_64__
+#ifndef __aarch64__
 	// TODO: Use a fake PLT stub that reports an error message?
 	_GLOBAL_OFFSET_TABLE_[1] = 0;
 	_GLOBAL_OFFSET_TABLE_[2] = 0;
@@ -201,8 +201,8 @@ extern "C" void *interpreterMain(uintptr_t *entry_stack) {
 		aux += 2;
 	}
 	globalDebugInterface.base = reinterpret_cast<void*>(ldso_base);
-#else
-	auto ehdr = reinterpret_cast<Elf64_Ehdr*>(__ehdr_start);
+#else /* MLIBC_STATIC_BUILD */
+	auto ehdr = reinterpret_cast<ElfW(Ehdr)*>(__ehdr_start);
 	phdr_pointer = reinterpret_cast<void*>((uintptr_t)ehdr->e_phoff + (uintptr_t)ehdr);
 	phdr_entry_size = ehdr->e_phentsize;
 	phdr_count = ehdr->e_phnum;

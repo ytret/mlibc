@@ -5,6 +5,7 @@
 #include <frg/vector.hpp>
 #include <mlibc/allocator.hpp>
 #include <mlibc/tcb.hpp>
+#include <link.h>
 
 struct ObjectRepository;
 struct Scope;
@@ -33,7 +34,7 @@ struct ObjectRepository {
 	// This is primarily used to create a SharedObject for the RTDL itself.
 	SharedObject *injectObjectFromDts(frg::string_view name,
 			frg::string<MemoryAllocator> path,
-			uintptr_t base_address, Elf64_Dyn *dynamic, uint64_t rts);
+			uintptr_t base_address, ElfW(Dyn) *dynamic, uint64_t rts);
 
 	// This is used to create a SharedObject for the executable that we want to link.
 	SharedObject *injectObjectFromPhdrs(frg::string_view name,
@@ -93,7 +94,7 @@ struct DebugInterface {
 struct LinkMap {
 	uintptr_t base = 0;
 	const char *name = nullptr;
-	Elf64_Dyn *dynv = nullptr;
+	ElfW(Dyn) *dynv = nullptr;
 	LinkMap *next = nullptr, *prev = nullptr;
 };
 
@@ -121,7 +122,7 @@ struct SharedObject {
 	Scope *loadScope;
 
 	// pointers to the dynamic table, GOT and entry point
-	Elf64_Dyn *dynamic = nullptr;
+	ElfW(Dyn) *dynamic = nullptr;
 	void **globalOffsetTable;
 	void *entry;
 
@@ -291,4 +292,3 @@ extern "C" void pltRelocateStub() __attribute__ (( visibility("hidden") ));
 // --------------------------------------------------------
 
 void *rtdl_auxvector();
-
