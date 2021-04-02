@@ -48,6 +48,9 @@ if not headers_only
 	add_project_arguments('-std=c++17', language: 'cpp')
 	add_project_arguments('-fno-rtti', '-fno-exceptions', language: 'cpp')
 	add_project_link_arguments('-nostdlib', language: ['c', 'cpp'])
+
+	rtdl_deps += meson.get_compiler('c').find_library('gcc')
+	libc_deps += meson.get_compiler('c').find_library('gcc')
 endif
 
 internal_conf.set_quoted('MLIBC_SYSTEM_NAME', host_machine.system())
