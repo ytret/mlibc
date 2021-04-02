@@ -5,7 +5,7 @@ cpu = 'i386'
 endian = 'little'
 
 [binaries]
-c = 'i686-elf-gcc'
-cpp = 'i686-elf-g++'
-ar = 'i686-elf-ar'
-strip = 'i686-elf-strip'
+c = 'i686-myos-gcc'
+cpp = 'i686-myos-g++'
+ar = 'i686-myos-ar'
+strip = 'i686-myos-strip'
