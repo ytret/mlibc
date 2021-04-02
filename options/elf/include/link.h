@@ -7,9 +7,13 @@ extern "C" {
 
 #include <elf.h>
 #include <stddef.h>
-    
+
+#if defined (__i386__)
+#define ElfW(type) Elf32_ ## type
+#elif defined (__x86_64__)
 #define ElfW(type) Elf64_ ## type
-    
+#endif
+
 struct dl_phdr_info {
 	Elf64_Addr dlpi_addr;
 	const char *dlpi_name;

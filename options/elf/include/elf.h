@@ -89,6 +89,16 @@ enum {
 	SHN_ABS = 0xFFF1
 };
 
+typedef struct
+{
+	Elf32_Word	st_name;	/* Symbol name (string tbl index) */
+	Elf32_Addr	st_value;	/* Symbol value */
+	Elf32_Word	st_size;	/* Symbol size */
+	unsigned char	st_info;	/* Symbol type and binding */
+	unsigned char	st_other;	/* Symbol visibility */
+	Elf32_Half	st_shndx;	/* Section index */
+} Elf32_Sym;
+
 typedef struct {
 	Elf64_Word st_name;
 	unsigned char st_info;
@@ -141,10 +151,23 @@ enum {
 	R_AARCH64_TLSDESC = 1031
 };
 
+typedef struct
+{
+	Elf32_Addr	r_offset;	/* Address */
+	Elf32_Word	r_info;		/* Relocation type and symbol index */
+} Elf32_Rel;
+
 typedef struct {
 	Elf64_Addr r_offset;
 	uint64_t   r_info;
 } Elf64_Rel;
+
+typedef struct
+{
+	Elf32_Addr	r_offset;	/* Address */
+	Elf32_Word	r_info;		/* Relocation type and symbol index */
+	Elf32_Sword	r_addend;	/* Addend */
+} Elf32_Rela;
 
 typedef struct {
 	Elf64_Addr r_offset;
