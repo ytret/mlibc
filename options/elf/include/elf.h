@@ -201,6 +201,17 @@ enum {
 };
 
 typedef struct {
+	Elf32_Word	p_type;
+	Elf32_Off	p_offset;
+	Elf32_Addr	p_vaddr;
+	Elf32_Addr	p_paddr;
+	Elf32_Word	p_filesz;
+	Elf32_Word	p_memsz;
+	Elf32_Word	p_flags;
+	Elf32_Word	p_align;
+} Elf32_Phdr;
+
+typedef struct {
 	Elf64_Word p_type; /* Type of segment */
 	Elf64_Word p_flags; /* Segment attributes */
 	Elf64_Off p_offset; /* Offset in file */

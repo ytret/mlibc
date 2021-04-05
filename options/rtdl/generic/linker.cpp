@@ -281,7 +281,7 @@ void ObjectRepository::_fetchFromPhdrs(SharedObject *object, void *phdr_pointer,
 
 	// segments are already mapped, so we just have to find the dynamic section
 	for(size_t i = 0; i < phdr_count; i++) {
-		auto phdr = (Elf64_Phdr *)((uintptr_t)phdr_pointer + i * phdr_entry_size);
+		auto phdr = (ElfW(Phdr) *)((uintptr_t)phdr_pointer + i * phdr_entry_size);
 		switch(phdr->p_type) {
 		case PT_PHDR:
 			// Determine the executable's base address (in the PIE case) by comparing
