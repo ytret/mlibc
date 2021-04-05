@@ -17,9 +17,10 @@ int uname(struct utsname *p) {
 	strcpy(p->machine, "x86_64");
 #elif defined (__aarch64__)
 	strcpy(p->machine, "aarch64");
+#elif defined (__i386__)
+	strcpy(p->machine, "i386");
 #else
 #	error Unknown architecture
 #endif
 	return 0;
 }
-

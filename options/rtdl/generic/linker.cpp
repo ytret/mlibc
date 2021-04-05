@@ -21,6 +21,8 @@ bool eagerBinding = true;
 constexpr inline bool tlsAboveTp = false;
 #elif defined(__aarch64__)
 constexpr inline bool tlsAboveTp = true;
+#elif defined(__i386__)
+constexpr inline bool tlsAboveTp = false; // FIXME: is this right?
 #else
 #	error Unknown architecture
 #endif
