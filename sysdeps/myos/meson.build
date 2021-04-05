@@ -6,6 +6,7 @@ endif
 
 libc_sources += files(
 	'generic/sysdeps.cpp',
+	'generic/entry.cpp',
 )
 
 if not no_headers
