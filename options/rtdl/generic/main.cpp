@@ -53,11 +53,11 @@ extern "C" void relocateSelf() {
 
 	auto ldso_base = reinterpret_cast<uintptr_t>(_DYNAMIC)
 			- reinterpret_cast<uintptr_t>(_GLOBAL_OFFSET_TABLE_[0]);
-	for(size_t disp = 0; disp < rela_size; disp += sizeof(Elf64_Rela)) {
-		auto reloc = reinterpret_cast<Elf64_Rela *>(ldso_base + rela_offset + disp);
+	for(size_t disp = 0; disp < rela_size; disp += sizeof(ElfW(Rela))) {
+		auto reloc = reinterpret_cast<ElfW(Rela) *>(ldso_base + rela_offset + disp);
 
-		Elf64_Xword type = ELF64_R_TYPE(reloc->r_info);
-		if(ELF64_R_SYM(reloc->r_info))
+		ElfW(Word) type = ELF32_R_TYPE(reloc->r_info);
+		if(ELF32_R_SYM(reloc->r_info))
 			__builtin_trap();
 
 		auto p = reinterpret_cast<uint64_t *>(ldso_base + reloc->r_offset);
@@ -78,15 +78,15 @@ extern "C" void relocateSelf() {
 
 extern "C" void *lazyRelocate(SharedObject *object, unsigned int rel_index) {
 	__ensure(object->lazyExplicitAddend);
-	auto reloc = (Elf64_Rela *)(object->baseAddress + object->lazyRelocTableOffset
-			+ rel_index * sizeof(Elf64_Rela));
-	Elf64_Xword type = ELF64_R_TYPE(reloc->r_info);
-	Elf64_Xword symbol_index = ELF64_R_SYM(reloc->r_info);
+	auto reloc = (ElfW(Rela) *)(object->baseAddress + object->lazyRelocTableOffset
+			+ rel_index * sizeof(ElfW(Rela)));
+	ElfW(Word) type = ELF32_R_TYPE(reloc->r_info);
+	ElfW(Word) symbol_index = ELF32_R_SYM(reloc->r_info);
 
 	__ensure(type == R_X86_64_JUMP_SLOT);
 
-	auto symbol = (Elf64_Sym *)(object->baseAddress + object->symbolTableOffset
-			+ symbol_index * sizeof(Elf64_Sym));
+	auto symbol = (ElfW(Sym) *)(object->baseAddress + object->symbolTableOffset
+			+ symbol_index * sizeof(ElfW(Sym)));
 	ObjectSymbol r(object, symbol);
 	frg::optional<ObjectSymbol> p = object->loadScope->resolveSymbol(r, 0);
 	if(!p)
@@ -412,11 +412,11 @@ int __dlapi_reverse(const void *ptr, __dlapi_symbol *info) {
 			return true;
 		};
 
-		auto hash_table = (Elf64_Word *)(object->baseAddress + object->hashTableOffset);
+		auto hash_table = (ElfW(Word) *)(object->baseAddress + object->hashTableOffset);
 		auto num_symbols = hash_table[1];
 		for(size_t i = 0; i < num_symbols; i++) {
-			ObjectSymbol cand{object, (Elf64_Sym *)(object->baseAddress
-					+ object->symbolTableOffset + i * sizeof(Elf64_Sym))};
+			ObjectSymbol cand{object, (ElfW(Sym) *)(object->baseAddress
+					+ object->symbolTableOffset + i * sizeof(ElfW(Sym)))};
 			if(eligible(cand) && cand.virtualAddress() == reinterpret_cast<uintptr_t>(ptr)) {
 				mlibc::infoLogger() << "rtdl: Found symbol " << cand.getString() << " in object "
 						<< object->path << frg::endlog;

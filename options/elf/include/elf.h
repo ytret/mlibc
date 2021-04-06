@@ -183,6 +183,13 @@ static inline Elf64_Xword ELF64_R_TYPE(Elf64_Xword info) {
 	return info & 0xFFFFFFFF;
 }
 
+static inline Elf32_Word ELF32_R_SYM(Elf32_Word val) {
+	return val >> 8;
+}
+static inline Elf32_Word ELF32_R_TYPE(Elf32_Word val) {
+	return val & 0xFF;
+}
+
 enum {
 	PT_LOAD = 1,
 	PT_DYNAMIC = 2,

@@ -199,13 +199,13 @@ void *accessDtv(SharedObject *object);
 // --------------------------------------------------------
 
 struct ObjectSymbol {
-	ObjectSymbol(SharedObject *object, const Elf64_Sym *symbol);
+	ObjectSymbol(SharedObject *object, const ElfW(Sym) *symbol);
 
 	SharedObject *object() {
 		return _object;
 	}
 
-	const Elf64_Sym *symbol() {
+	const ElfW(Sym) *symbol() {
 		return _symbol;
 	}
 
@@ -215,7 +215,7 @@ struct ObjectSymbol {
 
 private:
 	SharedObject *_object;
-	const Elf64_Sym *_symbol;
+	const ElfW(Sym) *_symbol;
 };
 
 // --------------------------------------------------------
@@ -257,7 +257,7 @@ private:
 
 	void _processStaticRelocations(SharedObject *object);
 	void _processLazyRelocations(SharedObject *object);
-	void _processRela(SharedObject *object, Elf64_Rela *reloc);
+	void _processRela(SharedObject *object, ElfW(Rela) *reloc);
 
 public:
 	void initObjects();
