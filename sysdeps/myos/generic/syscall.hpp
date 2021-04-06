@@ -1,4 +1,34 @@
 extern "C" {
+	static int do_syscall_0(int sc) {
+		int ret;
+		asm volatile ("int $0x88"
+			      : "=a" (ret)
+			      : "a" (sc)
+			      : "memory");
+		return ret;
+	}
+
+	static int do_syscall_1(int sc, int arg1) {
+		int ret;
+		asm volatile ("int $0x88"
+			      : "=a" (ret)
+			      : "a" (sc),
+				"b" (arg1)
+			      : "memory");
+		return ret;
+	}
+
+	static int do_syscall_2(int sc, int arg1, int arg2) {
+		int ret;
+		asm volatile ("int $0x88"
+			      : "=a" (ret)
+			      : "a" (sc),
+				"b" (arg1),
+				"c" (arg2)
+			      : "memory");
+		return ret;
+	}
+
 	static int do_syscall_6(
 		int sc,
 		int arg1,
@@ -20,6 +50,18 @@ extern "C" {
 }
 
 namespace mlibc {
+	inline int do_nargs_syscall(int sc) {
+		return do_syscall_0(sc);
+	}
+
+	inline int do_nargs_syscall(int sc, int arg1) {
+		return do_syscall_1(sc, arg1);
+	}
+
+	inline int do_nargs_syscall(int sc, int arg1, int arg2) {
+		return do_syscall_2(sc, arg1, arg2);
+	}
+
 	inline int do_nargs_syscall(
 		int sc,
 		int arg1,
