@@ -29,6 +29,18 @@ extern "C" {
 		return ret;
 	}
 
+	static int do_syscall_3(int sc, int arg1, int arg2, int arg3) {
+		int ret;
+		asm volatile ("int $0x88"
+			      : "=a" (ret)
+			      : "a" (sc),
+				"b" (arg1),
+				"c" (arg2),
+				"d" (arg3)
+			      : "memory");
+		return ret;
+	}
+
 	static int do_syscall_6(
 		int sc,
 		int arg1,
@@ -60,6 +72,10 @@ namespace mlibc {
 
 	inline int do_nargs_syscall(int sc, int arg1, int arg2) {
 		return do_syscall_2(sc, arg1, arg2);
+	}
+
+	inline int do_nargs_syscall(int sc, int arg1, int arg2, int arg3) {
+		return do_syscall_3(sc, arg1, arg2, arg3);
 	}
 
 	inline int do_nargs_syscall(
