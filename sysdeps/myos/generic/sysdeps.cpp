@@ -23,6 +23,8 @@
 
 #define SYS_EXIT		10
 
+#define SYS_IS_TTY		11
+
 #define __unimplemented() asm volatile ("ud2");
 #define __sys_ud2(rt, name, ...) __attribute__((noreturn)) rt sys_ ## name (__VA_ARGS__) { __unimplemented(); while(true) {} }
 
@@ -114,6 +116,13 @@ int sys_seek(int fd, off_t offset, int whence, off_t *new_offset) {
 void sys_exit(int status) {
 	do_syscall(SYS_EXIT, status);
 	__builtin_trap();
+}
+
+int sys_isatty(int fd) {
+	int ret = do_syscall(SYS_IS_TTY, fd);
+	if (ret < 0)
+		return -ret;
+	return 1;
 }
 
 }
