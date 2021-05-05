@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/time.h
+../../../../abis/mlibc/time.h

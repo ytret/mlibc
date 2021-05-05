@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/ino_t.h
+../../../../abis/mlibc/ino_t.h

@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/stat.h
+../../../../abis/mlibc/stat.h

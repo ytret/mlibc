@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/blksize_t.h
+../../../../abis/mlibc/blksize_t.h

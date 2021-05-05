@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/in.h
+../../../../abis/mlibc/in.h

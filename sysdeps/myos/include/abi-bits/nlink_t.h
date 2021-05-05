@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/nlink_t.h
+../../../../abis/mlibc/nlink_t.h

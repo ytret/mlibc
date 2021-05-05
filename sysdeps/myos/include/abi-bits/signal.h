@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/signal.h
+../../../../abis/mlibc/signal.h

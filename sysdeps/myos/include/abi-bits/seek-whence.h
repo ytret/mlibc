@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/seek-whence.h
+../../../../abis/mlibc/seek-whence.h

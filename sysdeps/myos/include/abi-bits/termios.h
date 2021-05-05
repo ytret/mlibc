@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/termios.h
+../../../../abis/mlibc/termios.h

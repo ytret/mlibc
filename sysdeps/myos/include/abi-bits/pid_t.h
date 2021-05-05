@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/pid_t.h
+../../../../abis/mlibc/pid_t.h

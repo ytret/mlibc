@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/mode_t.h
+../../../../abis/mlibc/mode_t.h

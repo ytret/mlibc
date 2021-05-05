@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/socket.h
+../../../../abis/mlibc/socket.h

@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/myos/auxv.h
+../../../../abis/managarm/auxv.h

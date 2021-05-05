@@ -1,1 +1,1 @@
-/home/yuri/dev/mlibc/abis/mlibc/blkcnt_t.h
+../../../../abis/mlibc/blkcnt_t.h
