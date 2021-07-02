@@ -45,7 +45,7 @@ if not headers_only
 	c_compiler = meson.get_compiler('c')
 
 	add_project_arguments('-nostdinc', '-fno-builtin', language: ['c', 'cpp'])
-	add_project_arguments('-std=c++17', language: 'cpp')
+	add_project_arguments('-std=c++20', language: 'cpp')
 	add_project_arguments('-fno-rtti', '-fno-exceptions', language: 'cpp')
 	add_project_link_arguments('-nostdlib', language: ['c', 'cpp'])
 
@@ -147,6 +147,7 @@ internal_sources = [
 	'options/internal/generic/ensure.cpp',
 	'options/internal/generic/essential.cpp',
 	'options/internal/generic/frigg.cpp',
+	'options/internal/generic/sigset.cpp',
 	'options/internal/gcc/stack_protector.cpp',
 	'options/internal/gcc/guard-abi.cpp',
 	'options/internal/gcc/initfini.cpp',
@@ -178,6 +179,7 @@ if not no_headers
 		'options/internal/include/bits/null.h',
 		'options/internal/include/bits/off_t.h',
 		'options/internal/include/bits/ssize_t.h',
+		'options/internal/include/bits/sigset_t.h',
 		subdir: 'bits'
 	)
 endif
@@ -237,22 +239,20 @@ subdir('options/intl')
 
 if not headers_only
 	if not static
+		if host_machine.cpu_family() == 'aarch64'
+			# Link with libgcc to get the necessary symbols (LSE atomics and math stuff)
+			libgcc = meson.get_compiler('c').find_library('gcc')
+			libc_deps += libgcc
+			rtdl_deps += libgcc
+		endif
+
 		ldso_lib = shared_library('ld', rtdl_sources,
 				name_prefix: '',
-				cpp_args:['-fvisibility=hidden', '-DMLIBC_BUILDING_RTDL', '-DFRIGG_HAVE_LIBC',
+				cpp_args: ['-fvisibility=hidden', '-DMLIBC_BUILDING_RTDL',
 					'-fno-stack-protector'],
 				include_directories: rtdl_include_dirs,
 				dependencies: rtdl_deps,
 				install: true)
-
-		extra_link_args = []
-
-		if host_machine.cpu_family() == 'aarch64'
-			# Link with libgcc to get math symbols ...
-			libc_deps += meson.get_compiler('c').find_library('gcc')
-			# ... but don't export them ourselves
-			extra_link_args += '-Wl,--exclude-libs=gcc'
-		endif
 
 		libc = shared_library('c',
 				[
@@ -261,12 +261,10 @@ if not headers_only
 					ansi_sources,
 					lsb_sources,
 				],
-				cpp_args: ['-DFRIGG_HAVE_LIBC'],
 				include_directories: libc_include_dirs,
 				dependencies: libc_deps,
 				link_with: [ldso_lib],
 				link_whole: libc_sublibs,
-				link_args: extra_link_args,
 				install: true,
 				pic: true)
 

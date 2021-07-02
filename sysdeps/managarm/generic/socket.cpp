@@ -73,7 +73,7 @@ int sys_bind(int fd, const struct sockaddr *addr_ptr, socklen_t addr_length) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto send_addr = parseSimple(element);
 	auto recv_resp = parseInline(element);
@@ -161,7 +161,7 @@ int sys_sockname(int fd, struct sockaddr *addr_ptr, socklen_t max_addr_length,
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	auto recv_addr = parseLength(element);
@@ -205,14 +205,14 @@ int sys_peername(int fd, struct sockaddr *addr_ptr, socklen_t max_addr_length,
 
 	HEL_CHECK(offer.error());
 	HEL_CHECK(sendReq.error());
+	if(recvResp.error() == kHelErrDismissed)
+		return ENOTSOCK;
 	HEL_CHECK(recvResp.error());
-	if (recvData.error() != kHelErrEndOfLane)
-		HEL_CHECK(recvData.error());
+	HEL_CHECK(recvData.error());
 
 	managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
 	resp.ParseFromArray(recvResp.data(), recvResp.length());
-	if(resp.error() == managarm::fs::Errors::ILLEGAL_REQUEST
-			|| resp.error() == managarm::fs::Errors::ILLEGAL_OPERATION_TARGET) {
+	if(resp.error() == managarm::fs::Errors::ILLEGAL_OPERATION_TARGET) {
 		return ENOTSOCK;
 	}else if(resp.error() == managarm::fs::Errors::NOT_CONNECTED) {
 		return ENOTCONN;
@@ -254,7 +254,7 @@ int sys_getsockopt(int fd, int layer, int number,
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
@@ -316,7 +316,7 @@ int sys_setsockopt(int fd, int layer, int number,
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 

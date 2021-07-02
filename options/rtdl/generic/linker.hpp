@@ -168,6 +168,11 @@ struct SharedObject {
 	bool wasInitialized;
 
 	Scope *objectScope;
+
+	// PHDR related stuff, we only set these for the main executable
+	void *phdrPointer = nullptr;
+	size_t phdrEntrySize = 0;
+	size_t phdrCount = 0;
 };
 
 void processCopyRelocations(SharedObject *object);
@@ -217,6 +222,8 @@ private:
 	SharedObject *_object;
 	const ElfW(Sym) *_symbol;
 };
+
+frg::optional<ObjectSymbol> resolveInObject(SharedObject *object, frg::string_view string);
 
 // --------------------------------------------------------
 // Scope

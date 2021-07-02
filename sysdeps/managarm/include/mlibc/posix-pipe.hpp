@@ -1,12 +1,10 @@
-
 #ifndef MLIBC_POSIX_PIPE
 #define MLIBC_POSIX_PIPE
 
-// FIXME: required for hel.h
 #include <signal.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <cstddef>
 
 #include <hel.h>
 #include <hel-syscalls.h>
@@ -74,8 +72,6 @@ struct Queue {
 	: _handle{kHelNullHandle} {
 		// We do not need to protect those allocations against signals as this constructor
 		// is only called during library initialization.
-		_queue = reinterpret_cast<HelQueue *>(getSysdepsAllocator().allocate(sizeof(HelQueue)
-				+ 2 * sizeof(int)));
 		_chunks[0] = reinterpret_cast<HelChunk *>(getSysdepsAllocator().allocate(sizeof(HelChunk) + 4096));
 		_chunks[1] = reinterpret_cast<HelChunk *>(getSysdepsAllocator().allocate(sizeof(HelChunk) + 4096));
 
@@ -93,10 +89,26 @@ struct Queue {
 		_lastProgress = 0;
 
 		// Setup the queue header.
-		_queue->headFutex = 0;
-		HEL_CHECK(helCreateQueue(_queue, 0, 1, 128, &_handle));
-		HEL_CHECK(helSetupChunk(_handle, 0, _chunks[0], 0));
-		HEL_CHECK(helSetupChunk(_handle, 1, _chunks[1], 0));
+		HelQueueParameters params {
+			.ringShift = 1,
+			.numChunks = 2,
+			.chunkSize = 4096
+		};
+		HEL_CHECK(helCreateQueue(&params, &_handle));
+
+		auto chunksOffset = (sizeof(HelQueue) + (sizeof(int) << 1) + 63) & ~size_t(63);
+		auto reservedPerChunk = (sizeof(HelChunk) + params.chunkSize + 63) & ~size_t(63);
+		auto overallSize = chunksOffset + params.numChunks * reservedPerChunk;
+
+		void *mapping;
+		HEL_CHECK(helMapMemory(_handle, kHelNullHandle, nullptr,
+				0, (overallSize + 0xFFF) & ~size_t(0xFFF),
+				kHelMapProtRead | kHelMapProtWrite, &mapping));
+
+		_queue = reinterpret_cast<HelQueue *>(mapping);
+		auto chunksPtr = reinterpret_cast<std::byte *>(mapping) + chunksOffset;
+		for(unsigned int i = 0; i < 2; ++i)
+			_chunks[i] = reinterpret_cast<HelChunk *>(chunksPtr + i * reservedPerChunk);
 
 		// Reset and enqueue the chunks.
 		_chunks[0]->progressFutex = 0;
@@ -106,6 +118,7 @@ struct Queue {
 
 		_queue->indexQueue[0] = 0;
 		_queue->indexQueue[1] = 1;
+		_queue->headFutex = 0;
 		_nextIndex = 2;
 		_wakeHeadFutex();
 	}
@@ -179,6 +192,7 @@ private:
 	void _waitProgressFutex(bool *done) {
 		while(true) {
 			auto futex = __atomic_load_n(&_retrieveChunk()->progressFutex, __ATOMIC_ACQUIRE);
+			__ensure(!(futex & ~(kHelProgressMask | kHelProgressWaiters | kHelProgressDone)));
 			do {
 				if(_lastProgress != (futex & kHelProgressMask)) {
 					*done = false;
@@ -188,7 +202,8 @@ private:
 					return;
 				}
 
-				__ensure(futex == _lastProgress);
+				if(futex & kHelProgressWaiters)
+					break; // Waiters bit is already set (in a previous iteration).
 			} while(!__atomic_compare_exchange_n(&_retrieveChunk()->progressFutex, &futex,
 						_lastProgress | kHelProgressWaiters,
 						false, __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE));
@@ -282,4 +297,3 @@ auto exchangeMsgsSync(HelHandle descriptor, Args &&...args) {
 
 
 #endif // MLIBC_POSIX_PIPE
-

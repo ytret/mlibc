@@ -101,5 +101,8 @@
 
 #define _POSIX_ARG_MAX 4096
 #define _POSIX_OPEN_MAX 16
+#define _POSIX_HOST_NAME_MAX 255
+
+#define PTHREAD_STACK_MIN 16384
 
 #endif // _LIMITS_H

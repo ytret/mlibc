@@ -282,6 +282,9 @@ SharedObject *ObjectRepository::requestObjectAtPath(frg::string_view path, uint6
 void ObjectRepository::_fetchFromPhdrs(SharedObject *object, void *phdr_pointer,
 		size_t phdr_entry_size, size_t phdr_count, void *entry_pointer) {
 	__ensure(object->isMainObject);
+	object->phdrPointer = phdr_pointer;
+	object->phdrEntrySize = phdr_entry_size;
+	object->phdrCount = phdr_count;
 	if(verbose)
 		mlibc::infoLogger() << "rtdl: Loading " << object->name << frg::endlog;
 
@@ -446,7 +449,8 @@ void ObjectRepository::_fetchFromFile(SharedObject *object, int fd) {
 				|| phdr->p_type == PT_NOTE
 				|| phdr->p_type == PT_GNU_EH_FRAME
 				|| phdr->p_type == PT_GNU_RELRO
-				|| phdr->p_type == PT_GNU_STACK) {
+				|| phdr->p_type == PT_GNU_STACK
+				|| phdr->p_type == PT_GNU_PROPERTY) {
 			// ignore the phdr
 		}else{
 			mlibc::panicLogger() << "Unexpected PHDR type 0x"
@@ -715,6 +719,8 @@ Tcb *allocateTcb() {
 	auto td_buffer = getAllocator().allocate(td_size);
 	memset(td_buffer, 0, td_size);
 
+	__ensure((reinterpret_cast<uintptr_t>(td_buffer) & (tlsMaxAlignment - 1)) == 0);
+
 	Tcb *tcb_ptr = nullptr;
 
 	if constexpr (tlsAboveTp) {
@@ -726,6 +732,7 @@ Tcb *allocateTcb() {
 	tcb_ptr->selfPointer = tcb_ptr;
 
 	tcb_ptr->stackCanary = __stack_chk_guard;
+	tcb_ptr->cancelBits = tcbCancelEnableBit;
 	tcb_ptr->didExit = 0;
 	tcb_ptr->returnValue = nullptr;
 	tcb_ptr->dtvSize = runtimeTlsMap->indices.size();
@@ -1049,8 +1056,6 @@ void Loader::_buildTlsMaps() {
 			object->tlsIndex = runtimeTlsMap->indices.size();
 			runtimeTlsMap->indices.push_back(object);
 
-			__ensure((16 & (object->tlsAlignment - 1)) == 0);
-
 			object->tlsModel = TlsModel::initial;
 
 			if constexpr (tlsAboveTp) {
@@ -1099,7 +1104,6 @@ void Loader::_buildTlsMaps() {
 			// There are some libraries (e.g. Mesa) that require static TLS even though
 			// they expect to be dynamically loaded.
 			if(object->haveStaticTls) {
-				__ensure((16 & (object->tlsAlignment - 1)) == 0);
 				auto ptr = runtimeTlsMap->initialPtr + object->tlsSegmentSize;
 				size_t misalign = ptr & (object->tlsAlignment - 1);
 				if(misalign)

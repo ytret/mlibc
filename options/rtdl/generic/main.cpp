@@ -373,9 +373,45 @@ void *__dlapi_resolve(void *handle, const char *string) {
 
 	frg::optional<ObjectSymbol> target;
 	if(handle) {
-		auto object = reinterpret_cast<SharedObject *>(handle);
-		__ensure(object->objectScope);
-		target = Scope::resolveWholeScope(object->objectScope, string, 0);
+		// POSIX does not unambiguously state how dlsym() is supposed to work; it just
+		// states that "The symbol resolution algorithm used shall be dependency order
+		// as described in dlopen()".
+		//
+		// Linux libc's lookup the symbol in the given DSO and all of its dependencies
+		// in breadth-first order. That is also what we implement here.
+		//
+		// Note that this *differs* from the algorithm that is used for relocations
+		// (since the algorithm used for relocations takes (i) the global scope,
+		// and (ii) the local scope of the DSO into account (which can contain more objects
+		// than just the dependencies of the DSO, if the DSO was loaded as a dependency
+		// of a dlopen()ed DSO).
+
+		frg::vector<SharedObject *, MemoryAllocator> queue{getAllocator()};
+
+		struct Token { };
+		frg::hash_map<
+				SharedObject *, Token,
+				frg::hash<SharedObject *>, MemoryAllocator
+		> visited{frg::hash<SharedObject *>{}, getAllocator()};
+
+		auto root = reinterpret_cast<SharedObject *>(handle);
+		visited.insert(root, Token{});
+		queue.push_back(root);
+
+		for(size_t i = 0; i < queue.size(); i++) {
+			auto current = queue[i];
+
+			target = resolveInObject(current, string);
+			if(target)
+				break;
+
+			for(auto dep : current->dependencies) {
+				if(visited.get(dep))
+					continue;
+				visited.insert(dep, Token{});
+				queue.push_back(dep);
+			}
+		}
 	}else{
 		target = Scope::resolveWholeScope(globalScope.get(), string, 0);
 	}
@@ -424,6 +460,28 @@ int __dlapi_reverse(const void *ptr, __dlapi_symbol *info) {
 				info->base = reinterpret_cast<void *>(object->baseAddress);
 				info->symbol = cand.getString();
 				info->address = reinterpret_cast<void *>(cand.virtualAddress());
+				return 0;
+			}
+		}
+	}
+
+	// Not found, find the DSO it should be in.
+	for(size_t i = 0; i < globalScope->_objects.size(); i++) {
+		auto object = globalScope->_objects[i];
+
+		for(size_t j = 0; j < object->phdrCount; j++) {
+			auto phdr = (Elf64_Phdr *)((uintptr_t)object->phdrPointer + j * object->phdrEntrySize);
+			if(phdr->p_type != PT_LOAD) {
+				continue;
+			}
+			uintptr_t start = object->baseAddress + phdr->p_vaddr;
+			uintptr_t end = start + phdr->p_memsz;
+			if(reinterpret_cast<uintptr_t>(ptr) >= start && reinterpret_cast<uintptr_t>(ptr) < end) {
+				mlibc::infoLogger() << "rtdl: Found DSO " << object->path << frg::endlog;
+				info->file = object->path.data();
+				info->base = reinterpret_cast<void *>(object->baseAddress);
+				info->symbol = nullptr;
+				info->address = 0;
 				return 0;
 			}
 		}

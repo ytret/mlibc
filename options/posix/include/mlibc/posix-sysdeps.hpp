@@ -19,8 +19,10 @@
 #include <sys/socket.h>
 #include <sys/resource.h>
 #include <sys/select.h>
+#include <sys/statvfs.h>
 #include <termios.h>
 #include <time.h>
+#include <ucontext.h>
 
 namespace [[gnu::visibility("hidden")]] mlibc {
 
@@ -58,6 +60,8 @@ int sys_close(int fd);
 [[gnu::weak]] int sys_isatty(int fd);
 [[gnu::weak]] int sys_stat(fsfd_target fsfdt, int fd, const char *path, int flags,
 		struct stat *statbuf);
+[[gnu::weak]] int sys_statvfs(const char *path, struct statvfs *out);
+[[gnu::weak]] int sys_fstatvfs(int fd, struct statvfs *out);
 [[gnu::weak]] int sys_readlink(const char *path, void *buffer, size_t max_size, ssize_t *length);
 [[gnu::weak]] int sys_rmdir(const char *path);
 [[gnu::weak]] int sys_ftruncate(int fd, size_t size);
@@ -152,6 +156,9 @@ int sys_vm_unmap(void *pointer, size_t size);
 [[gnu::weak]] int sys_mkfifoat(int dirfd, const char *path, int mode);
 [[gnu::weak]] int sys_getentropy(void *buffer, size_t length);
 [[gnu::weak]] int sys_mknodat(int dirfd, const char *path, int mode, int dev);
+
+[[gnu::weak]] int sys_before_cancellable_syscall(ucontext_t *uctx);
+[[gnu::weak]] int sys_tgkill(int tgid, int tid, int sig);
 
 } //namespace mlibc
 

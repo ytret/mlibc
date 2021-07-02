@@ -1,8 +1,7 @@
-
 #include <fcntl.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <cstddef>
 
 #include <frg/manual_box.hpp>
 #include <frg/string.hpp>
@@ -50,18 +49,31 @@ T load(void *ptr) {
 struct Queue {
 	Queue()
 	: _handle{kHelNullHandle}, _lastProgress(0) {
-		_queue = reinterpret_cast<HelQueue *>(getAllocator().allocate(sizeof(HelQueue)
-				+ sizeof(int)));
-		_queue->headFutex = 1;
-		HEL_CHECK(helCreateQueue(_queue, 0, 0, 128, &_handle));
+		HelQueueParameters params {
+			.ringShift = 0,
+			.numChunks = 1,
+			.chunkSize = 4096
+		};
+		HEL_CHECK(helCreateQueue(&params, &_handle));
 
-		_chunk = reinterpret_cast<HelChunk *>(getAllocator().allocate(sizeof(HelChunk) + 4096));
-		HEL_CHECK(helSetupChunk(_handle, 0, _chunk, 0));
+		auto chunksOffset = (sizeof(HelQueue) + (sizeof(int) << 0) + 63) & ~size_t(63);
+		auto reservedPerChunk = (sizeof(HelChunk) + params.chunkSize + 63) & ~size_t(63);
+		auto overallSize = chunksOffset + params.numChunks * reservedPerChunk;
+
+		void *mapping;
+		HEL_CHECK(helMapMemory(_handle, kHelNullHandle, nullptr,
+				0, (overallSize + 0xFFF) & ~size_t(0xFFF),
+				kHelMapProtRead | kHelMapProtWrite, &mapping));
+
+		_queue = reinterpret_cast<HelQueue *>(mapping);
+		_chunk = reinterpret_cast<HelChunk *>(
+				reinterpret_cast<std::byte *>(mapping) + chunksOffset);
 
 		// Reset and enqueue the first chunk.
 		_chunk->progressFutex = 0;
 
 		_queue->indexQueue[0] = 0;
+		_queue->headFutex = 1;
 		_nextIndex = 1;
 		_wakeHeadFutex();
 	}
@@ -108,6 +120,7 @@ private:
 	void _waitProgressFutex(bool *done) {
 		while(true) {
 			auto futex = __atomic_load_n(&_chunk->progressFutex, __ATOMIC_ACQUIRE);
+			__ensure(!(futex & ~(kHelProgressMask | kHelProgressWaiters | kHelProgressDone)));
 			do {
 				if(_lastProgress != (futex & kHelProgressMask)) {
 					*done = false;
@@ -117,7 +130,8 @@ private:
 					return;
 				}
 
-				__ensure(futex == _lastProgress);
+				if(futex & kHelProgressWaiters)
+					break; // Waiters bit is already set (in a previous iteration).
 			} while(!__atomic_compare_exchange_n(&_chunk->progressFutex, &futex,
 						_lastProgress | kHelProgressWaiters,
 						false, __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE));
@@ -210,7 +224,7 @@ int sys_open(const char *path, int flags, int *fd) {
 	HEL_CHECK(helSubmitAsync(posixLane, actions, 4, globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_head = parseSimple(element);
 	auto send_tail = parseSimple(element);
 	auto recv_resp = parseInline(element);
@@ -256,7 +270,7 @@ int sys_seek(int fd, off_t offset, int whence, off_t *new_offset) {
 	HEL_CHECK(helSubmitAsync(lane, actions, 3, globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	HEL_CHECK(offer->error);
@@ -301,7 +315,7 @@ int sys_read(int fd, void *data, size_t length, ssize_t *bytes_read) {
 	HEL_CHECK(helSubmitAsync(lane, actions, 5, globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto imbue_creds = parseSimple(element);
 	auto recv_resp = parseInline(element);
@@ -348,7 +362,7 @@ int sys_vm_map(void *hint, size_t size, int prot, int flags, int fd, off_t offse
 			globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -386,7 +400,7 @@ int sys_close(int fd) {
 	HEL_CHECK(helSubmitAsync(posixLane, actions, 3, globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	HEL_CHECK(offer->error);
@@ -421,7 +435,7 @@ int sys_futex_tid() {
 	HEL_CHECK(helSubmitAsync(posixLane, actions, 3, globalQueue->getHandle(), 0, 0));
 
 	auto element = globalQueue->dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	HEL_CHECK(offer->error);
@@ -450,4 +464,3 @@ int sys_futex_wake(int *pointer) {
 
 
 } // namespace mlibc
-

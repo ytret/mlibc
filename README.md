@@ -17,10 +17,25 @@
 2. Create ABI headers in `abis/some-new-os/`. Add symlinks in `sysdeps/some-new-os/include/abi-bits` to your ABI headers. Look at existing ports to figure out the ABI headers required for the options enabled by `sysdeps/some-new-os/meson.build`.
 3. In `sysdeps/some-new-os/`, add code to implement (a subset of) the functions from `options/internal/include/mlibc/sysdeps.hpp`. Which subset you need depends on the options that `sysdeps/some-new-os/meson.build` enables.
 
-## Building for myos
+## Local Development
+
+The `mlibc` test suite can be run under a Linux host. To do this, first run from the project root:
+```
+meson -Dbuild_tests=true build
+```
+This will create a `build` directory. Then, `cd build` and run the tests (showing output) with:
+```
+meson test -v
+```
+
+## Building for [myos](https://github.com/ytret/os)
+
+Generally these commands are used to build and install the library:
 
 ```
 $ meson builddir --cross-file cross.txt
 $ cd builddir
 $ DESTDIR=/path/to/sysroot ninja install
 ```
+
+However, more specific instructions are available at [ytret/os/toolchain/README.md](https://github.com/ytret/os/blob/master/toolchain/README.md) in the context of building a hosted GCC compiler.

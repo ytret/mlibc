@@ -87,6 +87,7 @@ if not no_headers
 		'include/abi-bits/nlink_t.h',
 		'include/abi-bits/pid_t.h',
 		'include/abi-bits/uid_t.h',
+		'include/abi-bits/wait.h',
 		subdir: 'abi-bits'
 	)
 endif
@@ -101,5 +102,16 @@ if not headers_only
 		install: true,
 		install_dir: get_option('libdir')
 	)
+
+	if host_machine.cpu_family() == 'x86_64'
+		custom_target('Scrt1',
+			build_by_default: true,
+			command: c_compiler.cmd_array() + ['-c', '-o', '@OUTPUT@', '@INPUT@'],
+			input: 'x86_64/crt-src/Scrt1.S',
+			output: 'Scrt1.o',
+			install: true,
+			install_dir: get_option('libdir')
+		)
+	endif
 endif
 

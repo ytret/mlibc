@@ -68,7 +68,7 @@ int sys_chdir(const char *path) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -109,7 +109,7 @@ int sys_fchdir(int fd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -146,7 +146,7 @@ int sys_chroot(const char *path) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -189,7 +189,7 @@ int sys_mkdirat(int dirfd, const char *path, mode_t mode) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -357,7 +357,7 @@ HelHandle __raw_map(int fd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	auto pull_memory = parseHandle(element);
@@ -411,7 +411,7 @@ int sys_fcntl(int fd, int request, va_list args, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
@@ -449,7 +449,7 @@ int sys_fcntl(int fd, int request, va_list args, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
@@ -491,7 +491,7 @@ int sys_fcntl(int fd, int request, va_list args, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
@@ -536,7 +536,7 @@ int sys_fcntl(int fd, int request, va_list args, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
@@ -552,8 +552,15 @@ int sys_fcntl(int fd, int request, va_list args, int *result) {
 		}
 		__ensure(resp.error() == managarm::fs::Errors::SUCCESS);
 		return 0;
-
-
+	}else if(request == F_SETLK) {
+		mlibc::infoLogger() << "\e[31mmlibc: F_SETLK\e[39m" << frg::endlog;
+		return 0;
+	}else if(request == F_SETLKW) {
+		mlibc::infoLogger() << "\e[31mmlibc: F_SETLKW\e[39m" << frg::endlog;
+		return 0;
+	}else if(request == F_GETLK) {
+		mlibc::infoLogger() << "\e[31mmlibc: F_GETLK\e[39m" << frg::endlog;
+		return ENOSYS;
 	}else{
 		mlibc::infoLogger() << "\e[31mmlibc: Unexpected fcntl() request: "
 				<< request << "\e[39m" << frg::endlog;
@@ -591,7 +598,7 @@ int sys_read_entries(int fd, void *buffer, size_t max_size, size_t *bytes_read) 
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -639,7 +646,7 @@ int sys_ttyname(int fd, char *buf, size_t size) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -658,6 +665,12 @@ int sys_ttyname(int fd, char *buf, size_t size) {
 		buf[resp.path().size()] = '\0';
 		return 0;
 	}
+}
+
+int sys_fdatasync(int) {
+	mlibc::infoLogger() << "\e[35mmlibc: fdatasync() is a no-op\e[39m"
+			<< frg::endlog;
+	return 0;
 }
 
 int sys_getcwd(char *buffer, size_t size) {
@@ -687,7 +700,7 @@ int sys_getcwd(char *buffer, size_t size) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	auto recv_path = parseInline(element);
@@ -762,7 +775,7 @@ int sys_vm_remap(void *pointer, size_t size, size_t new_size, void **window) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -802,7 +815,7 @@ int sys_vm_protect(void *pointer, size_t size, int prot) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -840,7 +853,7 @@ int sys_vm_unmap(void *pointer, size_t size) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -876,7 +889,7 @@ int sys_setsid(pid_t *sid) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -967,7 +980,7 @@ int sys_pipe(int *fds, int flags) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1085,7 +1098,7 @@ int sys_msg_send(int sockfd, const struct msghdr *hdr, int flags, ssize_t *lengt
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto send_data = parseSimple(element);
 	auto imbue_creds = parseSimple(element);
@@ -1167,7 +1180,7 @@ int sys_msg_recv(int sockfd, struct msghdr *hdr, int flags, ssize_t *length) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto imbue_creds = parseSimple(element);
 	auto recv_resp = parseInline(element);
@@ -1287,21 +1300,8 @@ int sys_poll(struct pollfd *fds, nfds_t count, int timeout, int *num_events) {
 	req.set_timeout(timeout > 0 ? int64_t{timeout} * 1000000 : timeout);
 
 	for(nfds_t i = 0; i < count; i++) {
-		int mask = 0;
-		if(fds[i].events & ~(POLLIN | POLLPRI | POLLOUT | POLLRDHUP | POLLERR | POLLHUP | POLLNVAL))
-			mlibc::infoLogger() << "\e[31mmlibc: Unexpected events for poll()\e[39m"
-					<< frg::endlog;
-		if(fds[i].events & POLLIN)
-			mask |= EPOLLIN;
-		if(fds[i].events & POLLOUT)
-			mask |= EPOLLOUT;
-		if(fds[i].events & POLLPRI)
-			mask |= EPOLLPRI;
-		if(fds[i].events & POLLRDHUP)
-			mask |= EPOLLRDHUP;
-
 		req.add_fds(fds[i].fd);
-		req.add_events(mask);
+		req.add_events(fds[i].events);
 	}
 
 	frg::string<MemoryAllocator> ser(getSysdepsAllocator());
@@ -1318,7 +1318,7 @@ int sys_poll(struct pollfd *fds, nfds_t count, int timeout, int *num_events) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1335,21 +1335,7 @@ int sys_poll(struct pollfd *fds, nfds_t count, int timeout, int *num_events) {
 	for(nfds_t i = 0; i < count; i++) {
 		if(resp.events(i))
 			m++;
-
-		fds[i].revents = 0;
-		if(resp.events(i) & EPOLLIN)
-			fds[i].revents |= POLLIN;
-		if(resp.events(i) & EPOLLOUT)
-			fds[i].revents |= POLLOUT;
-		if(resp.events(i) & EPOLLPRI)
-			fds[i].revents |= POLLPRI;
-		if(resp.events(i) & EPOLLRDHUP)
-			fds[i].revents |= POLLRDHUP;
-		// These are always reported by poll():
-		if(resp.events(i) & EPOLLERR)
-			fds[i].revents |= POLLERR;
-		if(resp.events(i) & EPOLLHUP)
-			fds[i].revents |= POLLHUP;
+		fds[i].revents = resp.events(i);
 	}
 
 	*num_events = m;
@@ -1385,7 +1371,7 @@ int sys_epoll_create(int flags, int *fd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1438,7 +1424,7 @@ int sys_epoll_ctl(int epfd, int mode, int fd, struct epoll_event *ev) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1499,7 +1485,7 @@ int sys_epoll_pwait(int epfd, struct epoll_event *ev, int n,
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	auto recv_data = parseLength(element);
@@ -1543,7 +1529,7 @@ int sys_timerfd_create(int flags, int *fd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1586,7 +1572,7 @@ int sys_timerfd_settime(int fd, int flags,
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1632,7 +1618,7 @@ int sys_signalfd_create(sigset_t mask, int flags, int *fd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -1769,6 +1755,29 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 		}
 		return 0;
 	}
+	case FIOCLEX: {
+		managarm::posix::IoctlFioclexRequest<MemoryAllocator> req(getSysdepsAllocator());
+		req.set_fd(fd);
+
+		auto [offer, sendReq, recvResp] = exchangeMsgsSync(
+			getPosixLane(),
+			helix_ng::offer(
+				helix_ng::sendBragiHeadOnly(req, getSysdepsAllocator()),
+				helix_ng::recvInline()
+			)
+		);
+
+		HEL_CHECK(offer.error());
+		HEL_CHECK(sendReq.error());
+		if(recvResp.error() == kHelErrDismissed)
+			return EINVAL;
+		HEL_CHECK(recvResp.error());
+
+		managarm::posix::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
+		resp.ParseFromArray(recvResp.data(), recvResp.length());
+		__ensure(resp.error() == managarm::posix::Errors::SUCCESS);
+		return 0;
+	}
 	case DRM_IOCTL_VERSION: {
 		auto param = reinterpret_cast<drm_version*>(arg);
 		HelAction actions[3];
@@ -1792,12 +1801,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -1849,12 +1860,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -1925,12 +1938,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2006,13 +2021,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 		auto recv_list = parseLength(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 		HEL_CHECK(recv_list->error);
 
@@ -2071,12 +2088,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2119,12 +2138,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2168,12 +2189,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2224,12 +2247,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2266,12 +2291,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2306,12 +2333,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2351,13 +2380,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 		auto recv_data = parseLength(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 		HEL_CHECK(recv_data->error);
 
@@ -2411,13 +2442,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto send_mode = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(send_mode->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(send_mode->error);
 		HEL_CHECK(recv_resp->error);
 
@@ -2464,12 +2497,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2515,12 +2550,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2569,17 +2606,19 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
 		resp.ParseFromArray(recv_resp->data, recv_resp->length);
-		if (resp.error() == managarm::fs::Errors::ILLEGAL_REQUEST) {
+		if (resp.error() == managarm::fs::Errors::NO_BACKING_DEVICE) {
 			return ENXIO;
 		}else if (resp.error() == managarm::fs::Errors::ILLEGAL_ARGUMENT) {
 			return EINVAL;
@@ -2614,12 +2653,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2654,13 +2695,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 		auto recv_attrs = parseLength(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 		HEL_CHECK(recv_attrs->error);
 
@@ -2698,13 +2741,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto send_attrs = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(send_attrs->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(send_attrs->error);
 		HEL_CHECK(recv_resp->error);
 
@@ -2738,12 +2783,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto imbue_creds = parseSimple(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
+		if(imbue_creds->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(imbue_creds->error);
 		HEL_CHECK(send_req->error);
 		HEL_CHECK(recv_resp->error);
@@ -2782,12 +2829,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2830,12 +2879,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2868,12 +2919,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -2905,6 +2958,8 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 		if(send_req.error())
 			return EINVAL;
 		HEL_CHECK(send_req.error());
+		if(imbue_creds.error() == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(imbue_creds.error());
 		HEL_CHECK(recv_resp.error());
 
@@ -2941,6 +2996,8 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 
 		HEL_CHECK(offer.error());
 		HEL_CHECK(send_req.error());
+		if(imbue_creds.error() == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(imbue_creds.error());
 		HEL_CHECK(recv_resp.error());
 
@@ -2977,6 +3034,8 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 		if(send_req.error())
 			return EINVAL;
 		HEL_CHECK(send_req.error());
+		if(imbue_creds.error() == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(imbue_creds.error());
 		HEL_CHECK(recv_resp.error());
 
@@ -3091,13 +3150,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 					globalQueue.getQueue(), 0, 0));
 
 			auto element = globalQueue.dequeueSingle();
-			auto offer = parseSimple(element);
+			auto offer = parseHandle(element);
 			auto send_req = parseSimple(element);
 			auto recv_resp = parseInline(element);
 			auto recv_data = parseLength(element);
 
 			HEL_CHECK(offer->error);
 			HEL_CHECK(send_req->error);
+			if(recv_resp->error == kHelErrDismissed)
+				return EINVAL;
 			HEL_CHECK(recv_resp->error);
 			HEL_CHECK(recv_data->error);
 
@@ -3137,13 +3198,15 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 					globalQueue.getQueue(), 0, 0));
 
 			auto element = globalQueue.dequeueSingle();
-			auto offer = parseSimple(element);
+			auto offer = parseHandle(element);
 			auto send_req = parseSimple(element);
 			auto recv_resp = parseInline(element);
 			auto recv_data = parseLength(element);
 
 			HEL_CHECK(offer->error);
 			HEL_CHECK(send_req->error);
+			if(recv_resp->error == kHelErrDismissed)
+				return EINVAL;
 			HEL_CHECK(recv_resp->error);
 			HEL_CHECK(recv_data->error);
 
@@ -3178,12 +3241,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -3218,12 +3283,14 @@ int sys_ioctl(int fd, unsigned long request, void *arg, int *result) {
 				globalQueue.getQueue(), 0, 0));
 
 		auto element = globalQueue.dequeueSingle();
-		auto offer = parseSimple(element);
+		auto offer = parseHandle(element);
 		auto send_req = parseSimple(element);
 		auto recv_resp = parseInline(element);
 
 		HEL_CHECK(offer->error);
 		HEL_CHECK(send_req->error);
+		if(recv_resp->error == kHelErrDismissed)
+			return EINVAL;
 		HEL_CHECK(recv_resp->error);
 
 		managarm::fs::SvrResponse<MemoryAllocator> resp(getSysdepsAllocator());
@@ -3478,7 +3545,7 @@ int sys_write(int fd, const void *data, size_t size, ssize_t *bytes_written) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto imbue_creds = parseSimple(element);
 	auto send_data = parseSimple(element);
@@ -3545,7 +3612,7 @@ int sys_pread(int fd, void *buf, size_t n, off_t off, ssize_t *bytes_read) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto imbue_creds = parseSimple(element);
 	auto recv_resp = parseInline(element);
@@ -3685,7 +3752,7 @@ int sys_dup(int fd, int flags, int *newfd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -3732,7 +3799,7 @@ int sys_dup2(int fd, int flags, int newfd) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -3870,7 +3937,7 @@ int sys_readlink(const char *path, void *data, size_t max_size, ssize_t *length)
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 	auto recv_data = parseLength(element);
@@ -3950,7 +4017,7 @@ int sys_ftruncate(int fd, size_t size) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -3992,7 +4059,7 @@ int sys_fallocate(int fd, off_t offset, size_t size) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -4074,7 +4141,7 @@ int sys_faccessat(int dirfd, const char *pathname, int mode, int flags) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -4124,7 +4191,7 @@ int sys_flock(int fd, int opts) {
 			globalQueue.getQueue(), 0, 0));
 
 	auto element = globalQueue.dequeueSingle();
-	auto offer = parseSimple(element);
+	auto offer = parseHandle(element);
 	auto send_req = parseSimple(element);
 	auto recv_resp = parseInline(element);
 
@@ -4275,9 +4342,6 @@ int sys_getentropy(void *buffer, size_t length) {
 	SignalGuard sguard;
 	auto p = reinterpret_cast<char *>(buffer);
 	size_t n = 0;
-
-	if(length > 256)
-		return EIO;
 
 	while(n < length) {
 		size_t chunk;
