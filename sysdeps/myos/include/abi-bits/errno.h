@@ -1,14 +1,14 @@
 #ifndef _ABIBITS_ERRNO_H
 #define _ABIBITS_ERRNO_H
 
-#define EBADFD 1
-#define EINVAL 2
-#define EMFILE 3
-#define ENOENT 4
-#define ENOTTY 5
+#define EBADF	1
+#define EINVAL	2
+#define EMFILE	3
+#define ENOENT	4
+#define ENOTTY	5
 
-#define EDOM 1000
-#define EILSEQ 1000
+#define EDOM 998
+#define EILSEQ 999
 #define ERANGE 1000
 
 #define E2BIG 1001
@@ -18,7 +18,6 @@
 #define EAFNOSUPPORT 1005
 #define EAGAIN 1006
 #define EALREADY 1007
-#define EBADF 1008
 #define EBADMSG 1009
 #define EBUSY 1010
 #define ECANCELED 1011
