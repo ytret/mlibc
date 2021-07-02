@@ -16,6 +16,7 @@
 #define SYS_DEBUG_PRINT_STR	9
 
 #define SYS_WRITE		1
+#define SYS_READ		2
 
 #define SYS_SEEK_ABS		3
 #define SYS_SEEK_REL		4
@@ -33,8 +34,6 @@ __sys_ud2(int, futex_wait, int *pointer, int expected)
 __sys_ud2(int, futex_wake, int *pointer)
 __sys_ud2(int, open, const char *path, int flags, int *fd)
 __sys_ud2(int, close, int fd)
-__sys_ud2(void, libc_panic)
-__sys_ud2(int, read, int fd, void *data, size_t length, ssize_t *bytes_read)
 __sys_ud2(int, vm_unmap, void *pointer, size_t size)
 __sys_ud2(int, clock_get, int clock, time_t *secs, long *nanos)
 __sys_ud2(int, anon_free, void *_1, unsigned long _2)
@@ -79,11 +78,19 @@ void sys_libc_log(const char *message) {
 	__ensure(ret == 0);
 }
 
-int sys_write(int fd, const void *buf, size_t size, ssize_t *bytes_written) {
-	int ret = do_syscall(SYS_WRITE, fd, buf, size);
+int sys_write(int fd, const void *buf, size_t len, ssize_t *bytes_written) {
+	int ret = do_syscall(SYS_WRITE, fd, buf, len);
 	if (ret < 0)
 		return -ret;
 	*bytes_written = ret;
+	return 0;
+}
+
+int sys_read(int fd, void *buf, size_t len, ssize_t *bytes_read) {
+	int ret = do_syscall(SYS_READ, fd, buf, len);
+	if (ret < 0)
+		return -ret;
+	*bytes_read = ret;
 	return 0;
 }
 
@@ -117,7 +124,14 @@ int sys_isatty(int fd) {
 	int ret = do_syscall(SYS_IS_TTY, fd);
 	if (ret < 0)
 		return -ret;
+	if (ret == 1)
+		return 0;
 	return 1;
+}
+
+void sys_libc_panic(void) {
+	sys_libc_log("libc panic");
+	sys_exit(-1);
 }
 
 }
