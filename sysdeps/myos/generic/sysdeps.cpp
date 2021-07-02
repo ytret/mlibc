@@ -12,7 +12,6 @@
 // FIXME: there should be a better way of error handling.
 
 #define SYS_SET_TLS		6
-#define SYS_GET_TLS		7
 
 #define SYS_DEBUG_PRINT_STR	9
 
@@ -73,10 +72,6 @@ int sys_tcb_set(void *pointer) {
 	int ret = do_syscall(SYS_SET_TLS, pointer);
 	__ensure(ret == 0);
 	return 0;
-}
-
-int sys_tcb_get() {
-	return do_syscall(SYS_GET_TLS);
 }
 
 void sys_libc_log(const char *message) {

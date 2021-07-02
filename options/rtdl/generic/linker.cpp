@@ -73,7 +73,7 @@ namespace {
 	Tcb *getCurrentTcb() {
 		uintptr_t ptr;
 #if defined(__i386__)
-		ptr = mlibc::sys_tcb_get();
+		asm volatile ("mov %%gs:0, %0" : "=r"(ptr));
 #elif defined(__x86_64__)
 		asm volatile ("mov %%fs:0, %0" : "=r"(ptr));
 #elif defined(__aarch64__)
