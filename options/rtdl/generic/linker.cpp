@@ -555,7 +555,7 @@ void ObjectRepository::_parseDynamic(SharedObject *object) {
 			object->initArraySize = dynamic->d_un.d_val;
 			break;
 		case DT_DEBUG:
-			dynamic->d_un.d_val = reinterpret_cast<ElfW(Word)>(&globalDebugInterface);
+			dynamic->d_un.d_val = reinterpret_cast<ElfW(Addr)>(&globalDebugInterface);
 		// ignore unimportant tags
 		case DT_SONAME: case DT_NEEDED: // we handle this later
 		case DT_FINI: case DT_FINI_ARRAY: case DT_FINI_ARRAYSZ:
