@@ -33,7 +33,7 @@ meson test -v
 Generally these commands are used to build and install the library:
 
 ```
-$ meson builddir --cross-file cross.txt
+$ meson builddir --cross-file ci/myos.cross-file
 $ cd builddir
 $ DESTDIR=/path/to/sysroot ninja install
 ```
