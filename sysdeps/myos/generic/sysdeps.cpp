@@ -26,8 +26,8 @@
 #define SYS_IS_TTY		11
 
 #define SYS_GET_PID		12
-
 #define SYS_FORK		13
+#define SYS_REPLACE_PROCESS	14
 
 #define __unimplemented() asm volatile ("ud2");
 #define __sys_ud2(rt, name, ...) __attribute__((noreturn)) rt sys_ ## name (__VA_ARGS__) { __unimplemented(); while(true) {} }
@@ -138,6 +138,11 @@ void sys_libc_panic(void) {
 	sys_exit(-1);
 }
 
+pid_t sys_getpid() {
+	int ret = do_syscall(SYS_GET_PID);
+	return ret;
+}
+
 int sys_fork(pid_t *child) {
 	int ret = do_syscall(SYS_FORK);
 	if (ret < 0)
@@ -146,9 +151,13 @@ int sys_fork(pid_t *child) {
 	return 0;
 }
 
-pid_t sys_getpid() {
-	int ret = do_syscall(SYS_GET_PID);
-	return ret;
+int sys_execve(const char *path, char *const argv[], char *const envp[]) {
+	int ret = do_syscall(SYS_REPLACE_PROCESS, path, argv, envp);
+	if (ret < 0)
+		return -ret;
+	sys_libc_log("SYS_REPLACE_PROCESS returned with a return value >= 0");
+	sys_libc_panic();
+	return 0;
 }
 
 }
