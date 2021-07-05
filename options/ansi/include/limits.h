@@ -3,37 +3,24 @@
 
 #define CHAR_BIT 8
 
-#if defined (__i386__)
-#ifndef LONG_MAX
-#define LONG_MAX __LONG_MAX__
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (-LONG_MAX - 1L)
+#ifndef INT_MAX
+# ifdef __INT_MAX__
+#  define INT_MAX __INT_MAX__
+# else
+#  error "Define either INT_MAX or __INT_MAX__"
+# endif
 #endif
 
 #ifndef ULONG_MAX
-#define ULONG_MAX (LONG_MAX * 2UL + 1UL)
-#endif
-
-#ifndef LONG_LONG_MAX
-#define LONG_LONG_MAX __LONG_LONG_MAX__
-#endif
-
-#ifndef LONG_LONG_MIN
-#define LONG_LONG_MIN (-LONG_LONG_MAX - 1LL)
-#endif
-
-#ifndef INT_MAX
-#define INT_MAX __INT_MAX__
+# define ULONG_MAX (LONG_MAX * 2UL + 1UL)
 #endif
 
 #ifndef SCHAR_MIN
-#define SCHAR_MIN (-SCHAR_MAX - 1)
+# define SCHAR_MIN (-SCHAR_MAX - 1)
 #endif
 
 #ifndef SCHAR_MAX
-#define SCHAR_MAX __SCHAR_MAX__
+# define SCHAR_MAX __SCHAR_MAX__
 #endif
 
 #ifndef UCHAR_MAX
@@ -59,7 +46,14 @@
 # undef CHAR_MAX
 # define CHAR_MAX SCHAR_MAX
 #endif
-#endif /* __i386__ */
+
+#ifndef LONG_LONG_MAX
+# define LONG_LONG_MAX __LONG_LONG_MAX__
+#endif
+
+#ifndef LONG_LONG_MIN
+# define LONG_LONG_MIN (-LONG_LONG_MAX - 1LL)
+#endif
 
 #ifdef LONG_MAX
 # ifdef LONG_MAX == INT32_MAX
@@ -75,8 +69,13 @@
 // Safe assumption
 #  define LONG_BIT 64
 # endif
+# define LONG_MAX __LONG_MAX__
 #else
 # error "Unsupported configuration, please define either LONG_MAX or __LONG_MAX__"
+#endif
+
+#ifndef LONG_MIN
+# define LONG_MIN (-LONG_MAX - 1L)
 #endif
 
 #undef LLONG_MAX
