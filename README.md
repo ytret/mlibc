@@ -1,8 +1,8 @@
 # mlibc is a C standard library
 
-![Continuous Integration](https://github.com/managarm/mlibc/workflows/Continuous%20Integration/badge.svg)
+![Continuous Integration](https://github.com/ytret/mlibc/workflows/Continuous%20Integration/badge.svg)
 
-**Official Discord server:** https://discord.gg/7WB6Ur3
+**Official [managarm/mlibc](https://github.com/managarm/mlibc) Discord server:** https://discord.gg/7WB6Ur3
 
 ## Design of the library
 
@@ -28,7 +28,7 @@ This will create a `build` directory. Then, `cd build` and run the tests (showin
 meson test -v
 ```
 
-## Building for [myos](https://github.com/ytret/os)
+## Building for [ytret/os](https://github.com/ytret/os)
 
 Generally these commands are used to build and install the library:
 
