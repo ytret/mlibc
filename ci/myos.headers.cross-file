@@ -1,8 +1,6 @@
 [binaries]
-c = 'i686-myos-gcc'
-cpp = 'i686-myos-g++'
-ar = 'i686-myos-ar'
-strip = 'i686-myos-strip'
+c = 'gcc-10'
+cpp = 'g++-10'
 
 [properties]
 needs_exe_wrapper = true
